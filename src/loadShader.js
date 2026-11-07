@@ -259,7 +259,7 @@ export function minifyShader (shader, newLine = false) {
         line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
         const indexes = getAllCharIndexes(line);
 
-        indexes.forEach(index => {
+        indexes.reverse().forEach(index => {
           if (line[index - 1] === ' ' && line[index - 2] !== '-') line = `${line.slice(0, index - 1)}${line.slice(index--)}`;
           if (line[index + 1] === ' ' && line[index + 2] !== '-') line = `${line.slice(0, index + 1)}${line.slice(index + 2)}`;
         });
