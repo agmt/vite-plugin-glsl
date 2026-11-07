@@ -269,7 +269,8 @@ export function minifyShader (shader, newLine = false) {
       }
 
       return result;
-    }, []).join('').replace(/\n+/g, '\n');
+    }, []).join('').replace(/\n+/g, '\n')
+    .replace(/^(?!#).+/gm, code => code.replace(/,(?=[)\]}>])/g, ''));
 }
 
 /**
