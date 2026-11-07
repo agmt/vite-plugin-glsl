@@ -117,54 +117,36 @@ function checkDuplicatedImports (path) {
  * @returns {string} Shader's source code without comments
  */
 function removeSourceComments (source, pattern, triple = false) {
-  const lines = source.split('\n');
   const comments = /\/\*|\*\//;
 
-  for (let l = lines.length; l--; ) {
-    const index = lines[l].indexOf('//');
+  source = source.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, comment => {
+    if (comment[1] === '*') return ' ';
 
-    if (index > -1) {
-      if (
-        lines[l][index + 2] === '/' &&
-        !comments.test(lines[l]) &&
-        !pattern.test(lines[l]) &&
-        !triple
-      )
-        continue;
+    return (
+      comment[2] === '/' &&
+      !comments.test(comment) &&
+      !pattern.test(comment) &&
+      !triple
+    ) ? comment : '';
+  });
 
-      lines[l] = lines[l].slice(0, index);
-    }
-  }
+  const startBlock = source.indexOf('/*');
+  const endBlock = source.indexOf('*/', startBlock);
 
-  source = lines.join('\n');
+  if (startBlock > -1 || endBlock > -1) {
+    const chunk = source.slice(
+      startBlock * +(endBlock === -1),
+      (startBlock === -1 && endBlock + 2) || void 0
+    );
 
-  while (true) {
-    const startBlock = source.indexOf('/*');
-    const endBlock = source.indexOf('*/', startBlock);
+    const comment = startBlock === -1 && '/*' || '*/';
+    const missing = startBlock === -1 && 'open' || 'clos';
 
-    if (startBlock < 0 && endBlock < 0) break;
-
-    else if (startBlock > -1 && endBlock > -1)
-      source = source.slice(0, startBlock) +
-        source.slice(endBlock + 2);
-
-    else {
-      const chunk = source.slice(
-        startBlock * +(endBlock === -1),
-        (startBlock === -1 && endBlock + 2) || void 0
-      );
-
-      const comment = startBlock === -1 && '/*' || '*/';
-      const missing = startBlock === -1 && 'open' || 'clos';
-
-      emitWarning(`Block comment was not ${missing}ed.`, {
-        code: 'vite-plugin-glsl',
-        detail: `Cannot find the corresponding ${missing}ing comment (${comment}) to the one in the` +
-        ` chunk below.\nMake sure it's present and not commented out by a line comment:\n\n${chunk}`
-      });
-
-      break;
-    }
+    emitWarning(`Block comment was not ${missing}ed.`, {
+      code: 'vite-plugin-glsl',
+      detail: `Cannot find the corresponding ${missing}ing comment (${comment}) to the one in the` +
+      ` chunk below.\nMake sure it's present and not commented out by a line comment:\n\n${chunk}`
+    });
   }
 
   return source;
@@ -242,7 +224,7 @@ export function minifyShader (shader, newLine = false) {
     return indexes;
   };
 
-  return shader.replace(/\\(?:\r\n|\n\r|\n|\r)|\/\*.*?\*\/|\/\/(?:\\(?:\r\n|\n\r|\n|\r)|[^\n\r])*/g, '')
+  return shader.replace(/\\(?:\r\n|\n\r|\n|\r)|\/\*[\s\S]*?\*\/|\/\/(?:\\(?:\r\n|\n\r|\n|\r)|[^\n\r])*/g, mark => mark[1] === '*' ? ' ' : '')
     .split(/\n+/).reduce((result, line) => {
       line = line.trim().replace(/\s{2,}|\t/g, ' ');
 
