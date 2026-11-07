@@ -255,6 +255,12 @@ export function minifyShader (shader, newLine = false) {
       }
 
       else {
+        line = line.replace(/(?<![\w.])(\d*)\.(\d*)((?:[eE][+-]?\d+)?[a-zA-Z]*)/g, (number, whole, fraction, rest) => {
+          if (!whole && !fraction) return number;
+          fraction = fraction.replace(/0+$/, '');
+          return `${whole === '0' && fraction ? '' : whole || (fraction ? '' : '0')}.${fraction}${rest}`;
+        });
+
         !line.startsWith('{') && result.length && result[result.length - 1].endsWith('else') && result.push(' ');
         line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
         const indexes = getAllCharIndexes(line);
