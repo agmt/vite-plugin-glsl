@@ -242,11 +242,21 @@ export function minifyShader (shader, newLine = false) {
     return indexes;
   };
 
+  const squeeze = line => {
+    line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
+    const indexes = getAllCharIndexes(line);
+
+    indexes.forEach(index => {
+      if (line[index - 1] === ' ' && line[index - 2] !== '-') line = `${line.slice(0, index - 1)}${line.slice(index--)}`;
+      if (line[index + 1] === ' ' && line[index + 2] !== '-') line = `${line.slice(0, index + 1)}${line.slice(index + 2)}`;
+    });
+
+    return line;
+  };
+
   return shader.replace(/\\(?:\r\n|\n\r|\n|\r)|\/\*.*?\*\/|\/\/(?:\\(?:\r\n|\n\r|\n|\r)|[^\n\r])*/g, '')
     .split(/\n+/).reduce((result, line) => {
       line = line.trim().replace(/\s{2,}|\t/g, ' ');
-
-      if (/@(vertex|fragment|compute)/.test(line) || line.endsWith('return')) line += ' ';
 
       if (line[0] === '#') {
         newLine && result.push('\n');
@@ -255,16 +265,9 @@ export function minifyShader (shader, newLine = false) {
       }
 
       else {
-        !line.startsWith('{') && result.length && result[result.length - 1].endsWith('else') && result.push(' ');
-        line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
-        const indexes = getAllCharIndexes(line);
-
-        indexes.forEach(index => {
-          if (line[index - 1] === ' ' && line[index - 2] !== '-') line = `${line.slice(0, index - 1)}${line.slice(index--)}`;
-          if (line[index + 1] === ' ' && line[index + 2] !== '-') line = `${line.slice(0, index + 1)}${line.slice(index + 2)}`;
-        });
-
-        result.push(line);
+        const last = result.findLast(Boolean)?.at(-1);
+        line && last && last !== '\n' && squeeze(`${last} ${line[0]}`).length === 3 && result.push(' ');
+        result.push(squeeze(line));
         newLine = true;
       }
 
