@@ -127,7 +127,7 @@ function removeSourceComments (source, pattern, triple = false) {
       if (
         lines[l][index + 2] === '/' &&
         !comments.test(lines[l]) &&
-        !pattern.test(lines[l]) &&
+        lines[l].search(pattern) === -1 &&
         !triple
       )
         continue;
@@ -306,7 +306,7 @@ function loadChunks (source, path, pattern, options) {
   let directory = dirname(unixPath);
   allChunks.add(chunkPath);
 
-  if (pattern.test(source)) {
+  if (source.search(pattern) > -1) {
     dependentChunks.set(unixPath, []);
     const currentDirectory = directory;
     const ext = options.defaultExtension;
