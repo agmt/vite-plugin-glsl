@@ -90,7 +90,7 @@ minify(code);                   // GLSL
 minify(code, { wgsl: true });   // WGSL
 ```
 
-`node --test "test/unit/*.test.js"` runs the unit tests; the one through a Vite build needs the dev dependencies installed.
+`node --test test/unit/*.test.js` runs the unit tests (the shell expands the pattern, which Node 20 does not); the one through a Vite build needs the dev dependencies installed.
 
 ## Example ##
 
