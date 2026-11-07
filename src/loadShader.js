@@ -113,22 +113,34 @@ function checkDuplicatedImports (path) {
  * @param {string}  source  Shader's source code
  * @param {RegExp}  pattern RegExp to import chunks
  * @param {boolean} triple  Remove triple slash comments
+ * @param {boolean} nested  Block comments nest, as WGSL's do
  * 
  * @returns {string} Shader's source code without comments
  */
-function removeSourceComments (source, pattern, triple = false) {
+function removeSourceComments (source, pattern, triple = false, nested = false) {
   const lines = source.split('\n');
   const comments = /\/\*|\*\//;
+
+  const blockEnd = start => {
+    if (!nested || start < 0) return source.indexOf('*/', start);
+    const blocks = /\/\*|\*\//g;
+    blocks.lastIndex = start + 2;
+
+    for (let depth = 1, block; (block = blocks.exec(source)); )
+      if ((depth += block[0] === '/*' ? 1 : -1) === 0) return block.index;
+
+    return -1;
+  };
 
   for (let l = lines.length; l--; ) {
     const index = lines[l].indexOf('//');
 
     if (index > -1) {
       if (
+        !triple &&
         lines[l][index + 2] === '/' &&
         !comments.test(lines[l]) &&
-        !pattern.test(lines[l]) &&
-        !triple
+        !pattern.test(lines[l])
       )
         continue;
 
@@ -140,7 +152,7 @@ function removeSourceComments (source, pattern, triple = false) {
 
   while (true) {
     const startBlock = source.indexOf('/*');
-    const endBlock = source.indexOf('*/', startBlock);
+    const endBlock = blockEnd(startBlock);
 
     if (startBlock < 0 && endBlock < 0) break;
 
@@ -228,11 +240,12 @@ function checkIncludedDependencies (path, root) {
  * removing unnecessary whitespace and empty lines
  * 
  * @param {string}  shader  Shader code with included chunks
- * @param {boolean} newLine Flag to require a new line for the code
+ * @param {Object}  options Shader's language: `wgsl` for WGSL, whose block comments nest
  * 
  * @returns {string} Minified shader's source code
  */
-export function minifyShader (shader, newLine = false) {
+export function minifyShader (shader, { wgsl = false } = {}) {
+  let newLine = false;
   const getAllCharIndexes = (line, char = '-', start = 0) => {
     const indexes = [];
 
@@ -242,7 +255,11 @@ export function minifyShader (shader, newLine = false) {
     return indexes;
   };
 
-  return shader.replace(/\\(?:\r\n|\n\r|\n|\r)|\/\*.*?\*\/|\/\/(?:\\(?:\r\n|\n\r|\n|\r)|[^\n\r])*/g, '')
+  const code = wgsl
+    ? removeSourceComments(shader, null, true, true)
+    : shader.replace(/\\(?:\r\n|\n\r|\n|\r)|\/\*.*?\*\/|\/\/(?:\\(?:\r\n|\n\r|\n|\r)|[^\n\r])*/g, '');
+
+  return code
     .split(/\n+/).reduce((result, line) => {
       line = line.trim().replace(/\s{2,}|\t/g, ' ');
 
@@ -302,7 +319,7 @@ function loadChunks (source, path, pattern, options) {
   if (recursion) return recursiveChunk;
   else if (recursion === null) return '';
 
-  source = removeSourceComments(source, pattern);
+  source = removeSourceComments(source, pattern, false, extname(path).toLowerCase() === '.wgsl');
   let directory = dirname(unixPath);
   allChunks.add(chunkPath);
 
@@ -385,8 +402,10 @@ export default async function (source, shader, options) {
 
   let outputShader = loadChunks(source, shader, pattern, options);
 
+  const wgsl = extname(shader).toLowerCase() === '.wgsl';
+
   options.minify && (outputShader = minifyShader(
-    removeSourceComments(outputShader, pattern, true))
+    removeSourceComments(outputShader, pattern, true, wgsl), { wgsl })
   );
 
   outputShader = await options.onComplete?.(outputShader, shader) ?? outputShader;
