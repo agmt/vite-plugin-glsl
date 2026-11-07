@@ -77,6 +77,21 @@ glsl({
 })
 ```
 
+## Minification ##
+
+`minify: true` takes out comments, blank lines and every space but those between two words or two signs that would read as one (`a+ +b`, `x/ *p`). It also drops a comma before a closing bracket and writes a float literal without the zeros that carry nothing (`0.50` as `.5`, `1.0` as `1.`). A directive (`#version`, `#define`) keeps a line of its own, as written, and the block comments of a `.wgsl` file nest, as WGSL's do.
+
+The same minifier is exported for a shader made elsewhere, such as by a compiler:
+
+```js
+import { minify } from 'vite-plugin-glsl';
+
+minify(code);                   // GLSL
+minify(code, { wgsl: true });   // WGSL
+```
+
+`node --test "test/unit/*.test.js"` runs the unit tests; the one through a Vite build needs the dev dependencies installed.
+
 ## Example ##
 
 ```
