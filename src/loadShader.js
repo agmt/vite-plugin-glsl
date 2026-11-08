@@ -256,7 +256,9 @@ export function minifyShader (shader, newLine = false) {
 
       else {
         !line.startsWith('{') && result.length && result[result.length - 1].endsWith('else') && result.push(' ');
+        line = line.replace(/(?<!\+)((?:\+\+)*\+)\s+(?=\+)|(\/)\s+(?=\*)/g, '$1$2\0');
         line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
+        line = line.replace(/\0/g, ' ');
         const indexes = getAllCharIndexes(line);
 
         indexes.forEach(index => {

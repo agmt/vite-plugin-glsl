@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import load from './load.js';
 
 test('two signs that would read as one token keep the space between them', async () => {
-  assert.equal(await load('a = b + +c;'), 'a=b++c;'); // ToDo: expected: 'a=b+ +c;'
-  assert.equal(await load('a = b + ++c;'), 'a=b+++c;'); // ToDo: expected: 'a=b+ ++c;'
-  assert.equal(await load('a = b++ + +c;'), 'a=b++++c;'); // ToDo: expected: 'a=b+++ +c;'
-  assert.equal(await load('let a = b / *p;', '/shader.wgsl'), 'let a=b/*p;'); // ToDo: expected: 'let a=b/ *p;'
+  assert.equal(await load('a = b + +c;'), 'a=b+ +c;');
+  assert.equal(await load('a = b + ++c;'), 'a=b+ ++c;');
+  assert.equal(await load('a = b++ + +c;'), 'a=b+++ +c;');
+  assert.equal(await load('let a = b / *p;', '/shader.wgsl'), 'let a=b/ *p;');
 });
 
 test('two signs that read the same joined lose the space between them', async () => {
