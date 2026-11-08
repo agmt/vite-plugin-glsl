@@ -2,7 +2,7 @@
 
 @vertex
 fn mainVert(@builtin(vertex_index) index: u32) ->
-  @builtin(position) position: vec4f
+  @builtin(position) vec4f
 {
   let position = array(
     vec2f(0.0,  1.0),
