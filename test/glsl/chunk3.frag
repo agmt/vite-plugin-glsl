@@ -1,3 +1,3 @@
 float chunkGreen () {
-  return 0.8;
+  return 1.0 - 0.1 - 0.1;
 }
