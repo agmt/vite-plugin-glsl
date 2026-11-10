@@ -35,8 +35,9 @@ export default async function ({
  * @description Internal function used to minify
  * shaders when `minify` option is set to `true`
  * 
- * @param {string} shader Shader source code
+ * @param {string} shader  Shader source code
+ * @param {Object} options Shader's language: `wgsl` for WGSL, whose block comments nest
  * 
  * @returns {string} Minified shader code
  */
-export declare function minify(shader: string): string;
+export declare function minify(shader: string, options?: { wgsl?: boolean }): string;
