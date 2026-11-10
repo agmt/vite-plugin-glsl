@@ -255,7 +255,7 @@ export function minifyShader (shader, { wgsl = false } = {}) {
 
   const squeeze = line => {
     line = line.replace(/(?<!\+)((?:\+\+)*\+)\s+(?=\+)|(\/)\s+(?=\*)/g, '$1$2\0');
-    line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1');
+    line = line.replace(/\s*({|}|=|\*|,|\+|\/|>|<|&|\||\[|\]|\(|\)|!|;|:|@|%|\^|~|\?)\s*/g, '$1');
     line = line.replace(/\0/g, ' ');
     const indexes = getAllCharIndexes(line);
 
