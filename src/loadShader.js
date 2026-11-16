@@ -261,6 +261,12 @@ export function minifyShader (shader, { wgsl = false } = {}) {
       }
 
       else {
+        line = line.replace(/(?<![\w.])(\d*)\.(\d*)((?:[eE][+-]?\d+)?[a-zA-Z]*)/g, (number, whole, fraction, rest) => {
+          if (!whole && !fraction) return number;
+          fraction = fraction.replace(/0+$/, '');
+          return `${whole === '0' && fraction ? '' : whole || (fraction ? '' : '0')}.${fraction}${rest}`;
+        });
+
         const prev = result.findLast(Boolean) ?? '';
         !line.startsWith('{') && prev.endsWith('else') && result.push(' ');
         /^(\w\w|\+\+|--|\/\*)$/.test(prev.slice(-1) + line.slice(0, 1)) && !prev.endsWith('else') && result.push(' ');
