@@ -266,7 +266,7 @@ export function minifyShader (shader, { wgsl = false } = {}) {
         /^(\w\w|\+\+|--|\/\*)$/.test(prev.slice(-1) + line.slice(0, 1)) && !prev.endsWith('else') && result.push(' ');
 
         line = line.replace(/([+-])\s+(?=\1)|(\/)\s+(?=\*)/g, '$1$2\0')
-          .replace(/\s*({|}|=|,|\+|\-|\*|\/|<|>|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1')
+          .replace(/\s*({|}|=|,|\+|\-|\*|\/|<|>|&|\||\[|\]|\(|\)|!|;|:|@|%|\^|~|\?)\s*/g, '$1')
           .replace(/\0/g, ' ');
 
         result.push(line);
