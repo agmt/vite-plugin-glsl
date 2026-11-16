@@ -228,9 +228,9 @@ export function minifyShader (shader, newLine = false) {
       }
 
       else {
-        const prev = result.at(-1) ?? '';
+        const prev = result.findLast(Boolean) ?? '';
         !line.startsWith('{') && prev.endsWith('else') && result.push(' ');
-        /\w$/.test(prev) && /^\w/.test(line) && !prev.endsWith('else') && result.push(' ');
+        /^(\w\w|\+\+|--|\/\*)$/.test(prev.slice(-1) + line.slice(0, 1)) && !prev.endsWith('else') && result.push(' ');
 
         line = line.replace(/([+-])\s+(?=\1)|(\/)\s+(?=\*)/g, '$1$2\0')
           .replace(/\s*({|}|=|,|\+|\-|\*|\/|<|>|&|\||\[|\]|\(|\)|!|;)\s*/g, '$1')
