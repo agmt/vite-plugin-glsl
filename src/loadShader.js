@@ -274,7 +274,8 @@ export function minifyShader (shader, { wgsl = false } = {}) {
       }
 
       return result;
-    }, []).join('').replace(/\n+/g, '\n');
+    }, []).join('').replace(/\n+/g, '\n')
+    .replace(/^(?!#).+/gm, code => code.replace(/,(?=[)\]}>])/g, ''));
 }
 
 /**

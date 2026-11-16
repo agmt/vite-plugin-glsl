@@ -11,7 +11,7 @@ fn mainVert(@builtin(vertex_index) index: u32) ->
 
     vec2f(0.0,  0.0),
     vec2f(1.0,  0.0),
-    vec2f(1.0,  1.0)
+    vec2f(1.0,  1.0),
   );
 
   let coords = position[index];
